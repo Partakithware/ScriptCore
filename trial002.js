@@ -138,13 +138,28 @@ Command.register("openvault", (sender, args) => safe(() => {
     sender.openInventory(inv);
 }));
 
-Command.register('listmethods', (sender, args) => safeExecute(() => {
-  if (!args?.length) { sender.sendMessage("Usage: /listmethods <ClassName>"); return; }
-  const cls = hostClass(args[0]);
-  if (!cls) { sender.sendMessage("§cClass not found: " + args[0]); return; }
-  const methods = cls.getMethods();
-  sender.sendMessage("Methods for " + args[0] + ":");
-  for (let m of methods) sender.sendMessage(" - " + m.toString());
+Command.register("listmethods", (sender, args) => safe(() => {
+    if (!args?.length) return sender.sendMessage("Usage: /listmethods <ClassName>");
+    
+    const cls = use(args[0]);
+    if (!cls) return sender.sendMessage("§cClass not found: " + args[0]);
+
+    let clsJava;
+    try {
+        // Get the actual java.lang.Class from the constructor
+        clsJava = cls.class || cls.prototype?.getClass?.() || null;
+        if (!clsJava) throw new Error("Cannot access java.lang.Class object");
+    } catch (e) {
+        return sender.sendMessage("§cFailed to get class object: " + e.message);
+    }
+
+    const methods = clsJava.getMethods();
+    if (!methods?.length) return sender.sendMessage("§cNo methods found for " + args[0]);
+
+    sender.sendMessage("§6Methods for " + args[0] + ":");
+    for (const m of methods) {
+        sender.sendMessage(" - §e" + m.getName() + "§7(" + m.getParameterTypes().join(", ") + ")");
+    }
 }));
 
 // ---------- Heartbeat ----------

@@ -78,7 +78,7 @@ Scheduler.runTask(() => {
 
 // Schedule repeating task
 Scheduler.runTaskTimer(() => {
-    Bukkit.broadcastMessage("Hello every 20 ticks!");
+    //Bukkit.broadcastMessage("Hello every 20 ticks!");
 }, 20, 20);
 
 // Async (still runs JS on main thread)
@@ -138,21 +138,21 @@ Command.register("openvault", (sender, args) => safe(() => {
     sender.openInventory(inv);
 }));
 
-Command.register("listmethods", (sender, args) => safe(() => {
-    if (!args?.length) return sender.sendMessage("Usage: /listmethods <ClassName>");
-    const cls = use(args[0]);
-    if (!cls) return sender.sendMessage("§cClass not found: " + args[0]);
-    const methods = cls.getMethods();
-    sender.sendMessage("Methods for " + args[0] + ":");
-    for (const m of methods) sender.sendMessage(" - " + m.toString());
+Command.register('listmethods', (sender, args) => safeExecute(() => {
+  if (!args?.length) { sender.sendMessage("Usage: /listmethods <ClassName>"); return; }
+  const cls = hostClass(args[0]);
+  if (!cls) { sender.sendMessage("§cClass not found: " + args[0]); return; }
+  const methods = cls.getMethods();
+  sender.sendMessage("Methods for " + args[0] + ":");
+  for (let m of methods) sender.sendMessage(" - " + m.toString());
 }));
 
 // ---------- Heartbeat ----------
 let counter = 0;
 Scheduler.runTaskTimer(() => safe(() => {
     counter++;
-    if (counter % 10 === 0)
-        Bukkit.broadcastMessage("§6[ScriptCore] heartbeat " + counter);
+    if (counter % 10 === 0){}
+        //Bukkit.broadcastMessage("§6[ScriptCore] heartbeat " + counter);
 }), 20, 20);
 
 // ---------- PlayerJoin Event ----------

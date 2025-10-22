@@ -162,6 +162,35 @@ Command.register("listmethods", (sender, args) => safe(() => {
     }
 }));
 
+Command.register("listmethodstoconsole", (sender, args) => safe(() => {
+    if (!args?.length) return sender.sendMessage("Usage: /listmethodstoconsole <ClassName>");
+    
+    const cls = use(args[0]);
+    if (!cls) return sender.sendMessage("§cClass not found: " + args[0]);
+
+    let clsJava;
+    try {
+        // Get the actual java.lang.Class from the constructor
+        clsJava = cls.class || cls.prototype?.getClass?.() || null;
+        if (!clsJava) throw new Error("Cannot access java.lang.Class object");
+    } catch (e) {
+        return sender.sendMessage("§cFailed to get class object: " + e.message);
+    }
+
+    const methods = clsJava.getMethods();
+    if (!methods?.length) return sender.sendMessage("§cNo methods found for " + args[0]);
+
+    // Log to console
+    log("Methods for " + args[0] + ":");
+    for (const m of methods) {
+        const params = m.getParameterTypes().map(p => p.getName()).join(", ");
+        log(" - " + m.getName() + "(" + params + ")");
+    }
+
+    sender.sendMessage("§aMethod list for " + args[0] + " has been printed to console.");
+}));
+
+
 // ---------- Heartbeat ----------
 let counter = 0;
 Scheduler.runTaskTimer(() => safe(() => {
